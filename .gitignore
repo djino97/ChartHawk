@@ -1,0 +1,9 @@
+# Секреты — никогда не коммитятся.
+.env
+
+# Скомпилированные бинарники.
+/collector/collector
+/collector/collector.exe
+
+# Артефакты go test -coverprofile и т.п.
+*.out

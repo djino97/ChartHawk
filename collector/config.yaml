@@ -1,0 +1,39 @@
+# Общие настройки сервиса сбора данных (Collector).
+# Значения вида ${VAR} подставляются из переменных окружения при старте.
+
+tinkoff:
+  # Адрес стрим-сервиса T-Invest API. Вынесен сюда, а не захардкожен в
+  # клиенте, чтобы можно было переключаться между боевым и sandbox-контуром
+  # без пересборки: https://tinkoff.github.io/investAPI/url_difference/
+  endpoint: "invest-public-api.tinkoff.ru:443"
+  token: "${TINKOFF_TOKEN}"
+  app_name: "charthawk-collector"
+  account_id: ""
+  max_retries: 3
+  reconnect:
+    initial_interval: "1s"
+    max_interval: "30s"
+    multiplier: 1.5
+    randomization_factor: 0.15
+
+http:
+  addr: ":8081"
+  admin_api_key: "${ADMIN_API_KEY}"
+
+kafka:
+  brokers: ["localhost:9092"]
+  candles_topic: "market.candles"
+  batch_size: 100
+  batch_timeout: "100ms"
+
+subscriptions:
+  max_per_stream: 300
+  max_streams: 1
+  initial:
+    - timeframe: "1min"
+      instruments: [SBER, GAZP, LKOH]
+    - timeframe: "5min"
+      instruments: [YDEX, VKCO]
+
+log:
+  level: "info"

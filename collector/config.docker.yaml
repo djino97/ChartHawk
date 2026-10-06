@@ -1,0 +1,38 @@
+# Конфиг для запуска коллектора внутри docker-compose (tools/docker-compose.yaml).
+# Отличие от config.yaml: kafka.brokers смотрит на service name "kafka" в
+# докер-сети, а не на localhost. Секреты (${TINKOFF_TOKEN}, ${ADMIN_API_KEY})
+# приходят так же — из окружения контейнера (см. env_file в docker-compose).
+
+tinkoff:
+  endpoint: "invest-public-api.tinkoff.ru:443"
+  token: "${TINKOFF_TOKEN}"
+  app_name: "charthawk-collector"
+  account_id: ""
+  max_retries: 3
+  reconnect:
+    initial_interval: "1s"
+    max_interval: "30s"
+    multiplier: 1.5
+    randomization_factor: 0.15
+
+http:
+  addr: ":8081"
+  admin_api_key: "${ADMIN_API_KEY}"
+
+kafka:
+  brokers: ["kafka:19092"]
+  candles_topic: "market.candles"
+  batch_size: 100
+  batch_timeout: "100ms"
+
+subscriptions:
+  max_per_stream: 300
+  max_streams: 1
+  initial:
+    - timeframe: "1min"
+      instruments: [SBER, GAZP, LKOH]
+    - timeframe: "5min"
+      instruments: [YDEX, VKCO]
+
+log:
+  level: "info"

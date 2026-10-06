@@ -1,0 +1,6 @@
+.env
+.env.example
+config.yaml
+config.docker.yaml
+.git
+*.md
