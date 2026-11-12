@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"strings"
 	"sync"
 	"time"
 
@@ -64,7 +65,7 @@ func Connect(ctx context.Context, cfg config.TinkoffConfig, producer *kafka.Prod
 		EndPoint:   cfg.EndPoint,
 		Token:      cfg.Token,
 		AppName:    cfg.AppName,
-		AccountId:  cfg.AccountID,
+		AccountId:  accountIDForSDK(cfg),
 		MaxRetries: cfg.MaxRetries,
 	}
 
@@ -91,6 +92,19 @@ func Connect(ctx context.Context, cfg config.TinkoffConfig, producer *kafka.Prod
 		streams:      make(map[int]*streamHandle),
 	}
 	return c, nil
+}
+
+// accountIDForSDK решает, какой AccountId передать в investgo.NewClient.
+// При пустом AccountId SDK сразу вызывает SandboxService (GetSandboxAccounts).
+// На боевом адресе invest-public-api.tinkoff.ru этот вызов отвечает
+// Unauthenticated 40003. Сбор свечей брокерский счёт не использует, поэтому
+// на боевом контуре подставляется заглушка, и sandbox-вызов не выполняется.
+// На sandbox-адресе пустой id оставляем: SDK сам откроет счёт песочницы.
+func accountIDForSDK(cfg config.TinkoffConfig) string {
+	if cfg.AccountID != "" || strings.Contains(cfg.EndPoint, "sandbox") {
+		return cfg.AccountID
+	}
+	return "charthawk-market-data"
 }
 
 // Resolver возвращает резолвер тикеров (реализует subscription.TickerResolver).

@@ -31,7 +31,9 @@ type TinkoffConfig struct {
 	Token string `yaml:"token"`
 	// AppName — идентификатор приложения, передаётся в x-app-name.
 	AppName string `yaml:"app_name"`
-	// AccountID — если пусто, SDK использует/открывает sandbox-счёт.
+	// AccountID — брокерский счёт. Для сбора рыночных данных не нужен.
+	// Пустое значение на sandbox-адресе оставляет автооткрытие счёта в SDK;
+	// на боевом адресе клиент sandbox не вызывает.
 	AccountID string `yaml:"account_id"`
 	// MaxRetries — количество ретраев unary-запросов на уровне SDK.
 	MaxRetries uint `yaml:"max_retries"`
