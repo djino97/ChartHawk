@@ -38,6 +38,21 @@ services:
       - charthawk
     restart: unless-stopped
 
+  # Kafka 4 не создаёт топики автоматически. Коллектор публикует в
+  # market.candles и без этого топика получает Unknown Topic Or Partition.
+  kafka-init:
+    image: apache/kafka:4.2.1
+    container_name: charthawk-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:19092 --create --if-not-exists --topic market.candles --partitions 1 --replication-factor 1
+    networks:
+      - charthawk
+    restart: "no"
+
   kafka-ui:
     image: provectuslabs/kafka-ui:v0.7.2
     container_name: charthawk-kafka-ui
@@ -62,6 +77,8 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     env_file:
       - ../collector/.env
     volumes:
